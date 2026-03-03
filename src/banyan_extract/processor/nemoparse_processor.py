@@ -52,6 +52,7 @@ class NemoparseProcessor(Processor):
                 }
             ]
 
+
         completion = self.client.chat.completions.create(
             model=self.model,
             # See Tool types section for more information.
@@ -119,7 +120,7 @@ class NemoparseProcessor(Processor):
                 img_byte_arr = img_byte_arr.getvalue()
                 file_pages.append(img_byte_arr)
         else:
-            if "png" in filepath:
+            if "png" in filepath or "tif" in filepath or "TIF" in filepath:
                 with open(filepath, "rb") as image_file:
                     file_pages.append(image_file.read())
             elif "pdf" in filepath:

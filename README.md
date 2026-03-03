@@ -22,5 +22,9 @@ To install the necessary dependencies for these tools please use `pip install .[
 
 Note: please ensure you follow the guidelines and usage licenses of the tools.
 
+## Using Nemotron-parse
+
+Copy the `.env.example` file change `NEMOTRON_ENDPOINT` to the endpoint of the Nemotron-parse model you want to use.
+
 ## Examples
 The `example_XXX.py` scripts contain basic scripts for processing pdf documents using different OCR tools under the hood.

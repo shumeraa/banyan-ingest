@@ -1,6 +1,8 @@
 import argparse
 import os
 
+from dotenv import load_dotenv, dotenv_values
+
 from banyan_extract import NemoparseProcessor 
 
 def parse_arguments():
@@ -10,6 +12,7 @@ def parse_arguments():
     parser.add_argument("--is_input_dir", action="store_true",  help="Flags to set input file to directory")
     parser.add_argument("--output_base", default="banyan-extract-output", type=str,  help="Base name for output files")
     parser.add_argument("--endpoint", default="", type=str, help="Endpoint url for nemoretreiver-parse model")
+    parser.add_argument("--model_name", default="", type=str, help="Endpoint url for nemoretreiver-parse model")
     return parser.parse_args()
 
 
@@ -19,9 +22,17 @@ if __name__ == '__main__':
     output_directory = args.output_dir
     output_base = args.output_base
     endpoint = args.endpoint
+    model_name = args.model_name
+
+    if len(endpoint) == 0:
+        config_values = dotenv_values(".env")
+        endpoint = config_values["NEMOPARSE_ENDPOINT"]
+        model_name = config_values["NEMOPARSE_MODEL"]
+        print(f"Using endpoint: {endpoint}")
+        print(f"Using model: {model_name}")
 
     if endpoint != "":
-        document_processor = NemoparseProcessor(endpoint_url=endpoint, model_name=args.model_name)
+        document_processor = NemoparseProcessor(endpoint_url=endpoint, model_name=model_name)
 
         if args.is_input_dir:
             input_directory = args.input_file
