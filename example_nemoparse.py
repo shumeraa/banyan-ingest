@@ -13,6 +13,8 @@ def parse_arguments():
     parser.add_argument("--output_base", default="banyan-extract-output", type=str,  help="Base name for output files")
     parser.add_argument("--endpoint", default="", type=str, help="Endpoint url for nemoretreiver-parse model")
     parser.add_argument("--model_name", default="", type=str, help="Endpoint url for nemoretreiver-parse model")
+    parser.add_argument("--checkpointing", action="store_true", help="Flag where if true, then batch documents will be saved as they get processed")
+    parser.add_argument("--draw_bboxes", action="store_true", default=False, help="Flag where if true, then ouptut will include images that show most bboxes found")
     return parser.parse_args()
 
 
@@ -44,9 +46,11 @@ if __name__ == '__main__':
                     file_paths.append(os.path.join(root, filename))
                     basenames.append(os.path.basename(filename))
 
-            outputs = document_processor.process_batch_documents(file_paths)
-            for file_output, basename in zip(outputs, basenames):
-                file_output.save_output(output_directory, basename)
+            print(args.draw_bboxes)
+            outputs = document_processor.process_batch_documents(file_paths, use_checkpointing=args.checkpointing, draw_bboxes=args.draw_bboxes, output_dir=output_directory)
+            if not args.checkpointing:
+                for file_output, basename in zip(outputs, basenames):
+                    file_output.save_output(output_directory, basename)
         else:
             filename = args.input_file
             outputs = document_processor.process_document(filename)

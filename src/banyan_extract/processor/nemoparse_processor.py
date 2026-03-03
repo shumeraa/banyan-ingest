@@ -3,6 +3,7 @@ import argparse
 import json
 import base64
 import io
+import os
 
 from openai import OpenAI
 from PIL import Image, ImageDraw
@@ -33,7 +34,7 @@ class NemoparseProcessor(Processor):
             print(f"An error occurred trying to encode the document: {e}")
             return None
 
-    def _process_image(self, image):
+    def _process_image(self, image, draw_bboxes=True):
         base64_string = self._encode_image(image)
         base64_image = f"data:image/png;base64,{base64_string}"
         messages = [
@@ -68,15 +69,16 @@ class NemoparseProcessor(Processor):
         base_image = Image.open(io.BytesIO(image))
         width, height = base_image.size
 
-        bbox_draw = ImageDraw.Draw(base_image)
-        color_dict = {
-                    "Text": "red",
-                    "Formula": "green",
-                    "Code": "blue",
-                    "Picture": "magenta",
-                    "Table": "cyan",
-                    "Caption": "yellow",
-                    }
+        if draw_bboxes:
+            bbox_draw = ImageDraw.Draw(base_image)
+            color_dict = {
+                        "Text": "red",
+                        "Formula": "green",
+                        "Code": "blue",
+                        "Picture": "magenta",
+                        "Table": "cyan",
+                        "Caption": "yellow",
+                        }
 
         txt = []
         images = []
@@ -101,12 +103,14 @@ class NemoparseProcessor(Processor):
 
             txt.append(element_text)
 
-            if entry['type'] in color_dict:
-                color = color_dict[entry['type']]
-                if ymin > ymax:
-                    ymin, ymax = ymax, ymin
-                bbox_draw.rectangle([xmin, ymin, xmax, ymax], outline=color, width=4)
-        #markdown_output = "\n".join(txt)
+            if draw_bboxes:
+                if entry['type'] in color_dict:
+                    color = color_dict[entry['type']]
+                    if ymin > ymax:
+                        ymin, ymax = ymax, ymin
+                    if xmin > xmax:
+                        xmin, xmax = xmax, xmin
+                    bbox_draw.rectangle([xmin, ymin, xmax, ymax], outline=color, width=4)
 
         return NemoparseData(text=txt, bbox_json=bbox_data, images=images, tables=tables, bbox_image=base_image) 
 
@@ -142,22 +146,27 @@ class NemoparseProcessor(Processor):
                     raise Exception(f"Unsupported filetype! {filepath}")
         return file_pages
 
-    def process_batch_documents(self, filepaths):
+    def process_batch_documents(self, filepaths, use_checkpointing=True, draw_bboxes=True, output_dir="./"):
         file_outputs = []
         for filepath in filepaths:
-            output = self.process_document(filepath)
-            file_outputs.append(output)
+            output = self.process_document(filepath, draw_bboxes=draw_bboxes)
+            if use_checkpointing:
+                basename = os.path.basename(filepath)
+                print(basename)
+                output.save_output(output_dir, basename)
+            else:
+                file_outputs.append(output)
 
         return file_outputs
 
     def process_page(self, page):
         return self._process_image(page)
 
-    def process_document(self, filepath):
+    def process_document(self, filepath, draw_bboxes=True):
         # Basic check of file type
         file_pages = self.get_pages(filepath) 
 
         output = NemoparseOutput()
         for page_image in file_pages:
-            output.add_output(self._process_image(page_image))
+            output.add_output(self._process_image(page_image, draw_bboxes=draw_bboxes))
         return output
