@@ -25,7 +25,7 @@ def parse_arguments():
     return parser.parse_args()
 
 
-if __name__ == '__main__':
+def main():
     args = parse_arguments()
 
     output_directory = args.output_dir
@@ -68,3 +68,7 @@ if __name__ == '__main__':
         outputs = document_processor.process_document(filename)
 
         outputs.save_output(output_directory, output_base)
+
+
+if __name__ == '__main__':
+    main()
