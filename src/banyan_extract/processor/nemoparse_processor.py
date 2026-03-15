@@ -13,8 +13,8 @@ from ..converter.pdf_to_image import convert_pdf_to_images, convert_bytes_to_ima
 from ..output.nemoparse_output import NemoparseData, NemoparseOutput
 
 class NemoparseProcessor(Processor):
-    
-    def __init__(self, endpoint_url="", model_name="nvidia/nemoretriever-parse"):
+
+    def __init__(self, endpoint_url="", model_name="nvidia/nemoretriever-parse", sort_by_position=True):
         super().__init__()
         self.model_url = endpoint_url
         self.client = OpenAI(
@@ -24,6 +24,41 @@ class NemoparseProcessor(Processor):
               api_key = "non-empty"
             )
         self.model=model_name
+        self.sort_by_position = sort_by_position
+
+    def sort_elements_by_position(self, bbox_data, width, height):
+        """
+        Sort document elements based on their spatial position.
+
+        Args:
+            bbox_data: List of element dictionaries from API response
+            width: Page width in pixels
+            height: Page height in pixels
+
+        Returns:
+            List of sorted element dictionaries
+        """
+        def get_sort_key(element):
+            bbox = element['bbox']
+            # Convert normalized coordinates to absolute pixels
+            # Use top-left corner (ymin, xmin) instead of center for better reading order
+            y_top = bbox['ymin'] * height
+            x_left = bbox['xmin'] * width
+
+            # Element type priority (headers first, then text, then other elements)
+            type_priority = {
+                'Section-header': 0,
+                'Text': 1,
+                'Formula': 2,
+                'Code': 3,
+                'Picture': 4,
+                'Table': 5,
+                'Caption': 6
+            }.get(element['type'], 7)
+
+            return (y_top, x_left, type_priority)
+
+        return sorted(bbox_data, key=get_sort_key)
 
     def _encode_image(self, image):
         try:
@@ -68,6 +103,10 @@ class NemoparseProcessor(Processor):
 
         base_image = Image.open(io.BytesIO(image))
         width, height = base_image.size
+
+        # Sort elements by spatial position if enabled
+        if self.sort_by_position:
+            bbox_data = self.sort_elements_by_position(bbox_data, width, height)
 
         if draw_bboxes:
             bbox_draw = ImageDraw.Draw(base_image)

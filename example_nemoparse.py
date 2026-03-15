@@ -34,7 +34,7 @@ if __name__ == '__main__':
         print(f"Using model: {model_name}")
 
     if endpoint != "":
-        document_processor = NemoparseProcessor(endpoint_url=endpoint, model_name=model_name)
+        document_processor = NemoparseProcessor(endpoint_url=endpoint, model_name=model_name, sort_by_position=True)
 
         if args.is_input_dir:
             input_directory = args.input_file

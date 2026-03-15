@@ -22,6 +22,7 @@ def parse_arguments():
     parser.add_argument("--model_name", default="", type=str, help="Endpoint url for nemoretreiver-parse model")
     parser.add_argument("--checkpointing", action="store_true", help="Flag where if true, then batch documents will be saved as they get processed")
     parser.add_argument("--draw_bboxes", action="store_true", default=False, help="Flag where if true, then ouptut will include images that show most bboxes found")
+    parser.add_argument("--sort_by_position", action="store_true", default=True, help="Sort elements by spatial position for logical reading order")
     return parser.parse_args()
 
 
@@ -43,7 +44,7 @@ def main():
             print(f"Using model: {model_name}")
 
         if endpoint != "":
-            document_processor = NemoparseProcessor(endpoint_url=endpoint, model_name=model_name)
+            document_processor = NemoparseProcessor(endpoint_url=endpoint, model_name=model_name, sort_by_position=args.sort_by_position)
         else:
             raise Exception("Missing nemotron-parse endpoint url!")
     elif args.backend == "marker":
