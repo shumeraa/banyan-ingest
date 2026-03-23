@@ -11,19 +11,16 @@ from PIL import Image, ImageDraw
 from .processor import Processor
 from ..converter.pdf_to_image import convert_pdf_to_images, convert_bytes_to_images
 from ..output.nemoparse_output import NemoparseData, NemoparseOutput
+from ..ocr.nemotron_ocr import NemotronOCR
 
 class NemoparseProcessor(Processor):
 
     def __init__(self, endpoint_url="", model_name="nvidia/nemoretriever-parse", sort_by_position=True):
         super().__init__()
-        self.model_url = endpoint_url
-        self.client = OpenAI(
-              base_url = self.model_url,
-              # For local deployment, an API key is not needed but the following string
-              # varible should be non-empty.
-              api_key = "non-empty"
-            )
-        self.model=model_name
+        self.nemotron_ocr = NemotronOCR(
+            endpoint_url=endpoint_url,
+            model_name=model_name
+        )
         self.sort_by_position = sort_by_position
 
     def sort_elements_by_position(self, bbox_data, width, height):
@@ -72,34 +69,9 @@ class NemoparseProcessor(Processor):
     def _process_image(self, image, draw_bboxes=True):
         base64_string = self._encode_image(image)
         base64_image = f"data:image/png;base64,{base64_string}"
-        messages = [
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                # You can provide the image URL or send the image
-                                # data as a Base64-encoded string.
-                                "url": base64_image,
-                            },
-                        },
-                    ]
-                }
-            ]
 
-
-        completion = self.client.chat.completions.create(
-            model=self.model,
-            # See Tool types section for more information.
-            tools=[{"type": "function", "function": {"name": "markdown_bbox"}}],
-            messages=messages
-        )
-
-        tool_call = completion.choices[0].message.tool_calls[0]
-        response = json.loads(tool_call.function.arguments)
-
-        bbox_data = response[0]
+        # Use the wrapper for image processing
+        bbox_data = self.nemotron_ocr.get_detailed_ocr_results(base64_image)
 
         base_image = Image.open(io.BytesIO(image))
         width, height = base_image.size

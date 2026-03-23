@@ -17,6 +17,7 @@ from pptx.shapes.group import GroupShape
 
 from .processor import Processor
 from ..output.pptx_output import PptxOutput
+from ..ocr.nemotron_ocr import NemotronOCR
 
 
 try:
@@ -36,18 +37,55 @@ except:
 
 class PptxProcessor(Processor):
     
-    def __init__(self):
+    def __init__(self, ocr_backend="surya", nemotron_endpoint="", nemotron_model="nvidia/nemoretriever-parse"):
+        """
+        Initialize PPTX processor with OCR backend selection.
+        
+        Args:
+            ocr_backend: Which OCR backend to use ('surya' or 'nemotron')
+            nemotron_endpoint: URL for Nemotron parse endpoint (if using nemotron)
+            nemotron_model: Model name for Nemotron OCR
+        """
         super().__init__()
-        if USE_OCR:
-            self.latex_predictor = MarkdownTexifyPredictor()
-        else:
-            self.latex_predictor = None
+        self.ocr_backend = None  # Single member variable for OCR backend
+        self.ocr_available = False
+
+        # Initialize selected OCR backend
+        if ocr_backend == "nemotron":
+            try:
+                self.ocr_backend = NemotronOCR(
+                    endpoint_url=nemotron_endpoint,
+                    model_name=nemotron_model
+                )
+                self.ocr_available = True
+            except Exception as e:
+                print(f"Failed to initialize Nemotron OCR: {e}")
+                self.ocr_available = False
+        else:  # Default to Surya
+            try:
+                self.ocr_backend = MarkdownTexifyPredictor()
+                self.ocr_available = USE_OCR
+            except:
+                self.ocr_available = False
+                print("Surya OCR not installed; OCR not available for PPTX processing")
 
     def ocr_image(self, image):
-        if USE_OCR:
-            ocr_output = self.latex_predictor([image])[0]
-            if ocr_output.text is not None:
-                return ocr_output.text
+        """Perform OCR using the selected backend."""
+        if not self.ocr_available or self.ocr_backend is None:
+            return ""
+
+        try:
+            if isinstance(self.ocr_backend, NemotronOCR):
+                # Use Nemotron OCR
+                return self.ocr_backend.ocr_image(image)
+            else:
+                # Use Surya OCR
+                ocr_output = self.ocr_backend([image])[0]
+                if ocr_output.text is not None:
+                    return ocr_output.text
+        except Exception as e:
+            print(f"OCR failed: {e}")
+
         return ""
 
     def process_image(self, image):
