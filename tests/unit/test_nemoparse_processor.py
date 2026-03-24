@@ -14,16 +14,12 @@ Test Organization:
 """
 
 import os
-import sys
 import io
 import tempfile
 from unittest.mock import Mock, patch, MagicMock
 from PIL import Image
 
 import pytest
-
-# Add src to path for imports
-sys.path.insert(0, os.path.abspath('/projects/src'))
 
 from banyan_extract.processor.nemoparse_processor import NemoparseProcessor
 from banyan_extract.output.nemoparse_output import NemoparseData

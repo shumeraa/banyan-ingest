@@ -15,10 +15,6 @@ from PIL import Image
 
 import pytest
 
-import sys
-import os
-sys.path.insert(0, os.path.abspath('/projects/src'))
-
 from banyan_extract.output.nemoparse_output import NemoparseOutput, NemoparseData
 
 

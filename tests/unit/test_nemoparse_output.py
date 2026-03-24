@@ -6,15 +6,12 @@ without mocking, using real implementations wherever possible.
 """
 
 import os
-import sys
 import tempfile
 import json
 from pathlib import Path
 from PIL import Image
 
 import pytest
-
-sys.path.insert(0, os.path.abspath('/projects/src'))
 
 from banyan_extract.output.nemoparse_output import NemoparseOutput, NemoparseData
 
