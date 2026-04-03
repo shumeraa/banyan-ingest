@@ -13,3 +13,12 @@ __pycache__/
 
 # Environment
 venvs
+
+plans/
+
+.ai_logs/
+.opencode/
+.envrc
+.env
+
+.coverage

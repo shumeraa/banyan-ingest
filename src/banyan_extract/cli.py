@@ -28,6 +28,7 @@ def parse_arguments():
     parser.add_argument("--checkpointing", action="store_true", help="Flag where if true, then batch documents will be saved as they get processed")
     parser.add_argument("--draw_bboxes", action="store_true", default=False, help="Flag where if true, then ouptut will include images that show most bboxes found")
     parser.add_argument("--sort_by_position", action="store_true", default=True, help="Sort elements by spatial position for logical reading order")
+    parser.add_argument("--rotation_angle", default=0, type=float, help="What angle (in degrees) to rotate the input page (or pages)")
     parser.add_argument("--pptx_ocr_backend", default="surya", type=str,
                        help="OCR backend for PPTX processing (surya or nemotron)")
     parser.add_argument("--pptx_nemotron_endpoint", default="", type=str,
@@ -113,18 +114,18 @@ def main():
                         raise Exception("Missing nemotron-parse endpoint url!")
 
                 # Process single file
-                output = processor.process_document(filepath)
+                output = processor.process_document(filepath, rotation_angle=args.rotation_angle)
                 if args.checkpointing:
                     output.save_output(output_directory, basename)
         else:
             # Use the selected processor for all files
-            outputs = document_processor.process_batch_documents(file_paths, use_checkpointing=args.checkpointing, draw_bboxes=args.draw_bboxes, output_dir=output_directory)
+            outputs = document_processor.process_batch_documents(file_paths, use_checkpointing=args.checkpointing, draw_bboxes=args.draw_bboxes, output_dir=output_directory, rotation_angle=args.rotation_angle)
             if not args.checkpointing:
                 for file_output, basename in zip(outputs, basenames):
                     file_output.save_output(output_directory, basename)
     else:
         filename = args.input_file
-        outputs = document_processor.process_document(filename)
+        outputs = document_processor.process_document(filename, rotation_angle=args.rotation_angle)
 
         outputs.save_output(output_directory, output_base)
 
