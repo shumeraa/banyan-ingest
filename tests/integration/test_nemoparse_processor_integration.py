@@ -133,7 +133,7 @@ class TestNemoparseProcessorIntegration:
         
         # Mock the OCR API response with page-specific content
         call_count = {'count': 0}
-        def mock_ocr_response(base64_image):
+        def mock_ocr_response(base64_image, **kwargs):
             # Extract page number from the mock data (simplified)
             call_count['count'] += 1
             page_num = call_count['count']
@@ -210,7 +210,7 @@ class TestNemoparseProcessorIntegration:
         
         # Mock the OCR API to succeed for first page but fail for second
         call_count = {'count': 0}
-        def mock_ocr_with_error(base64_image):
+        def mock_ocr_with_error(base64_image, **kwargs):
             if call_count['count'] == 0:
                 # First page - success
                 call_count['count'] += 1
@@ -237,7 +237,7 @@ class TestNemoparseProcessorIntegration:
         # Test error recovery by processing with error handling
         # Mock the OCR API to return empty results for failed pages
         call_count = {'count': 0}
-        def mock_ocr_with_recovery(base64_image):
+        def mock_ocr_with_recovery(base64_image, **kwargs):
             try:
                 if call_count['count'] == 0:
                     call_count['count'] += 1
@@ -301,7 +301,7 @@ class TestNemoparseProcessorIntegration:
         
         # Mock the OCR API response with document-specific content
         call_count = {'count': 0}
-        def mock_ocr_response(base64_image):
+        def mock_ocr_response(base64_image, **kwargs):
             # Extract document ID from the mock data (simplified)
             call_count['count'] += 1
             doc_id = f"doc{call_count['count']}"

@@ -261,7 +261,7 @@ class TestNemoparseOutputExampleBased:
         
         # Mock the OCR API response with document-specific content
         call_count = {'count': 0}
-        def mock_ocr_response(base64_image):
+        def mock_ocr_response(base64_image, **kwargs):
             call_count['count'] += 1
             doc_name = document_names[call_count['count'] - 1]
             return [
@@ -322,7 +322,7 @@ class TestNemoparseOutputExampleBased:
         processor.get_pages = Mock(return_value=[mock_pdf_bytes])
         
         # Mock the OCR API to fail
-        def mock_ocr_failure(base64_image):
+        def mock_ocr_failure(base64_image, **kwargs):
             raise Exception("OCR service temporarily unavailable")
         
         processor.nemotron_ocr.get_detailed_ocr_results = Mock(side_effect=mock_ocr_failure)
@@ -337,7 +337,7 @@ class TestNemoparseOutputExampleBased:
             print(f"Error handled gracefully: {e}")
         
         # Example: Processing with error recovery
-        def mock_ocr_with_recovery(base64_image):
+        def mock_ocr_with_recovery(base64_image, **kwargs):
             try:
                 # Simulate OCR that might fail
                 return [

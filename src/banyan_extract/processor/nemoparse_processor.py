@@ -71,7 +71,7 @@ class NemoparseProcessor(Processor):
             print(f"An error occurred trying to encode the document: {e}")
             return None
 
-    def _run_single_ocr_pass(self, image, draw_bboxes=True, temperature=0.0, rotation_angle: float = 0):
+    def _run_single_ocr_pass(self, image, draw_bboxes, temperature, rotation_angle):
         
         if rotation_angle != 0:
             image = rotate_image(Image.open(io.BytesIO(image)), rotation_angle)
@@ -138,9 +138,9 @@ class NemoparseProcessor(Processor):
 
         return NemoparseData(text=txt, bbox_json=bbox_data, images=images, tables=tables, bbox_image=base_image) 
 
-    def _process_image(self, image, temperature=0.0, draw_bboxes=True, re_run=False, re_run_temp=0.4):
+    def _process_image(self, image, temperature=0.0, draw_bboxes=True, re_run=False, re_run_temp=0.4, rotation_angle: float = 0):
         print(f"\nRunning with temperature {temperature}")
-        output = self._run_single_ocr_pass(image, draw_bboxes=draw_bboxes, temperature=temperature)
+        output = self._run_single_ocr_pass(image, draw_bboxes=draw_bboxes, temperature=temperature, rotation_angle=rotation_angle)
 
         if not re_run:
             return output
@@ -169,7 +169,7 @@ class NemoparseProcessor(Processor):
             print(f"\n*** Retry Attempt {attempts} of {max_attempts} (Temp: {re_run_temp}) ***")
             
             # Generate new output
-            current_output = self._run_single_ocr_pass(image, draw_bboxes=draw_bboxes, temperature=re_run_temp)
+            current_output = self._run_single_ocr_pass(image, draw_bboxes=draw_bboxes, temperature=re_run_temp, rotation_angle=rotation_angle)
             
             # Evaluate the new output
             should_rerun, missed_percentage = evaluate_extraction(

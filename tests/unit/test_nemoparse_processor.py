@@ -325,7 +325,7 @@ class TestNemoparseProcessorErrorHandling:
         image_bytes2 = img_byte_arr2.getvalue()
         
         # Mock the OCR API to succeed for first doc but fail for second
-        def mock_ocr_response(base64_image):
+        def mock_ocr_response(base64_image, **kwargs):
             if 'doc1' in base64_image:
                 return [
                     {
@@ -631,7 +631,7 @@ class TestNemoparseProcessorIntegration:
             mock_images.append(img_byte_arr.getvalue())
         
         # Mock the OCR API response
-        def mock_ocr_response(base64_image):
+        def mock_ocr_response(base64_image, **kwargs):
             page_num = len(mock_ocr_responses) + 1
             mock_ocr_responses.append(page_num)
             return [
