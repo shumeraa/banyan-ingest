@@ -20,19 +20,7 @@ plans/
 .opencode/
 .envrc
 .env
-
 .coverage
-
+.examples
 plans/
-
-.ai_logs/
-.opencode/
-.envrc
-.env
-
-.coverage
-
-# Extra
 /build
-/examples
-/.env
