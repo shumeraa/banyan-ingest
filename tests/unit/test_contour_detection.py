@@ -8,7 +8,7 @@ import os
 import re
 import json
 import pytest
-from banyan_extract.processor.evaluate_extraction import evaluate_extraction
+from banyan_extract.utils.evaluate_extraction import evaluate_extraction
 
 # Directory Paths
 DATA_DIR_NO_BBOX = "tests/data/contour_detection/without_bbox"

@@ -15,13 +15,15 @@ dependencies = [
     "python-pptx",
     "pandas",
     "pdf2image",
-    "python-dotenv"
+    "python-dotenv",
+     "opencv-python", 
+     "numpy"
     ]
 
 [project.optional-dependencies]
 marker = ["marker-pdf", "surya-ocr"]
     
-nemotronparse = ["openai", "opencv-python", "numpy"]
+nemotronparse = ["openai"]
 
 [project.scripts]
 banyan-extract = "banyan_extract.cli:main"

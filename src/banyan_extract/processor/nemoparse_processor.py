@@ -15,7 +15,7 @@ from ..converter.pdf_to_image import convert_pdf_to_images, convert_bytes_to_ima
 from ..output.nemoparse_output import NemoparseData, NemoparseOutput
 from ..ocr.nemotron_ocr import NemotronOCR
 
-from .evaluate_extraction import evaluate_extraction
+from ..utils.evaluate_extraction import evaluate_extraction
 from ..utils.image_rotation import rotate_image, is_valid_rotation_angle
 
 class NemoparseProcessor(Processor):
